@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>
+            GooglePlus API Example!!!
+        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="libs/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <!--script src="https://apis.google.com/js/plusone.js"></script-->
+        <style>
+
+            /* GLOBAL STYLES
+            -------------------------------------------------- */
+            /* Padding below the footer and lighter body text */
+
+            body {
+                padding-bottom: 40px;
+                color: #5a5a5a;
+            }
+
+            /* CUSTOMIZE THE NAVBAR
+            -------------------------------------------------- */
+
+            /* Special class on .container surrounding .navbar, used for positioning it into place. */
+            .navbar-wrapper {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 10;
+                margin-top: 20px;
+                margin-bottom: -90px; 
+                /* Negative margin to pull up carousel. 90px is roughly margins and height of navbar. */
+            }
+            .navbar-wrapper .navbar {
+
+            }
+
+            /* Remove border and change up box shadow for more contrast */
+            .navbar .navbar-inner {
+                border: 0;
+                -webkit-box-shadow: 0 2px 10px rgba(0,0,0,.25);
+                -moz-box-shadow: 0 2px 10px rgba(0,0,0,.25);
+                box-shadow: 0 2px 10px rgba(0,0,0,.25);
+            }
+
+            /* Downsize the brand/project name a bit */
+            .navbar .brand {
+                padding: 14px 20px 16px; /* Increase vertical padding to match navbar links */
+                font-size: 16px;
+                font-weight: bold;
+                text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+            }
+
+            /* Navbar links: increase padding for taller navbar */
+            .navbar .nav > li > a {
+                padding: 15px 20px;
+            }
+
+            /* Offset the responsive button for proper vertical alignment */
+            .navbar .btn-navbar {
+                margin-top: 10px;
+            }
+
+
+
+            /* CUSTOMIZE THE NAVBAR
+            -------------------------------------------------- */
+
+            /* Carousel base class */
+            .carousel {
+                margin-bottom: 60px;
+            }
+
+            .carousel .container {
+                position: relative;
+                z-index: 9;
+            }
+
+            .carousel-control {
+                height: 80px;
+                margin-top: 0;
+                font-size: 120px;
+                text-shadow: 0 1px 1px rgba(0,0,0,.4);
+                background-color: transparent;
+                border: 0;
+            }
+
+            .carousel .item {
+                height: 500px;
+            }
+            .carousel img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                min-width: 100%;
+                height: 500px;
+            }
+
+            .carousel-caption {
+                background-color: transparent;
+                position: static;
+                max-width: 550px;
+                padding: 0 20px;
+                margin-top: 200px;
+            }
+            .carousel-caption h1,
+            .carousel-caption .lead {
+                margin: 0;
+                line-height: 1.25;
+                color: #fff;
+                text-shadow: 0 1px 1px rgba(0,0,0,.4);
+            }
+            .carousel-caption .btn {
+                margin-top: 10px;
+            }
+
+
+
+            /* MARKETING CONTENT
+            -------------------------------------------------- */
+
+            /* Center align the text within the three columns below the carousel */
+            .marketing .span4 {
+                text-align: center;
+            }
+            .marketing h2 {
+                font-weight: normal;
+            }
+            .marketing .span4 p {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+
+            /* Featurettes
+            ------------------------- */
+
+            .featurette-divider {
+                margin: 80px 0; /* Space out the Bootstrap <hr> more */
+            }
+            .featurette {
+                padding-top: 120px; /* Vertically center images part 1: add padding above and below text. */
+                overflow: hidden; /* Vertically center images part 2: clear their floats. */
+            }
+            .featurette-image {
+                margin-top: -120px; /* Vertically center images part 3: negative margin up the image the same amount of the padding to center it. */
+            }
+
+            /* Give some space on the sides of the floated elements so text doesn't run right into it. */
+            .featurette-image.pull-left {
+                margin-right: 40px;
+            }
+            .featurette-image.pull-right {
+                margin-left: 40px;
+            }
+
+            /* Thin out the marketing headings */
+            .featurette-heading {
+                font-size: 50px;
+                font-weight: 300;
+                line-height: 1;
+                letter-spacing: -1px;
+            }
+
+
+
+            /* RESPONSIVE CSS
+            -------------------------------------------------- */
+
+            @media (max-width: 979px) {
+
+                .container.navbar-wrapper {
+                    margin-bottom: 0;
+                    width: auto;
+                }
+                .navbar-inner {
+                    border-radius: 0;
+                    margin: -20px 0;
+                }
+
+                .carousel .item {
+                    height: 500px;
+                }
+                .carousel img {
+                    width: auto;
+                    height: 500px;
+                }
+
+                .featurette {
+                    height: auto;
+                    padding: 0;
+                }
+                .featurette-image.pull-left,
+                .featurette-image.pull-right {
+                    display: block;
+                    float: none;
+                    max-width: 40%;
+                    margin: 0 auto 20px;
+                }
+            }
+
+
+            @media (max-width: 767px) {
+
+                .navbar-inner {
+                    margin: -20px;
+                }
+
+                .carousel {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+                .carousel .container {
+
+                }
+                .carousel .item {
+                    height: 300px;
+                }
+                .carousel img {
+                    height: 300px;
+                }
+                .carousel-caption {
+                    width: 65%;
+                    padding: 0 70px;
+                    margin-top: 100px;
+                }
+                .carousel-caption h1 {
+                    font-size: 30px;
+                }
+                .carousel-caption .lead,
+                .carousel-caption .btn {
+                    font-size: 18px;
+                }
+
+                .marketing .span4 + .span4 {
+                    margin-top: 40px;
+                }
+
+                .featurette-heading {
+                    font-size: 30px;
+                }
+                .featurette .lead {
+                    font-size: 18px;
+                    line-height: 1.5;
+                }
+
+            }
+
+            footer {
+                margin-top: 10px;
+            }
+
+            .container > footer p {
+                text-align: center; /* center align it with the container */
+            }
+            .container {
+                width: auto; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+            }
+
+            /* The white background content wrapper */
+            .content {
+                background-color: #fff;
+                padding: 20px;
+                margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+                -webkit-border-radius: 0 0 6px 6px;
+                -moz-border-radius: 0 0 6px 6px;
+                border-radius: 0 0 6px 6px;
+                -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                box-shadow: 0 1px 2px rgba(0,0,0,.15);
+            }
+
+            /* Page header tweaks */
+            .page-header {
+                background-color: #f5f5f5;
+                padding: 20px 20px 10px;
+                margin: -20px -20px 20px;
+            }
+
+            /* Styles you shouldn't keep as they are for displaying this base example only */
+            .content .span10,
+            .content .span4 {
+                min-height: 500px;
+            }
+            /* Give a quick and non-cross-browser friendly divider */
+            .content .span4 {
+                margin-left: 0;
+                padding-left: 19px;
+                border-left: 1px solid #eee;
+            }
+
+            .topbar .btn {
+                border: 0;
+            }
+            
+            .box{
+               margin-left: 25px; 
+            }
+
+        </style>
+        <script>
+            if (window.location.href.search(/\?x/) < 0) {
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-924459-7']);
+                _gaq.push(['_trackPageview']);
+                (function() {
+                    var ga = document.createElement('script');
+                    ga.type = 'text/javascript';
+                    ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0];
+                    s.parentNode.insertBefore(ga, s);
+                })();
+            }
+        </script>
+    </head>
+    <body>
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="#">Google Plus API</a>
+                    <div class="nav-collapse collapse navbar-responsive-collapse">
+                        <ul class="nav">
+                            <li class="active"><a href="#">Home</a></li>
+                        </ul>
+                        <ul class="nav pull-right">
+                            <li class="divider-vertical"></li>
+                            <li><button id="signGoogle" type="button" class="btn btn-primary">Sign Google</button></li>
+                        </ul>
+                    </div><!-- /.nav-collapse -->
+                </div>
+            </div><!-- /navbar-inner -->
+        </div>
+
+
+        <div class="content">
+            <div class="row">
+                <div class="span10">
+                    <div class="row">
+                        <div class='span4'>
+                            <div class="well box">
+                                <h3>Seller Info</h3>
+                                <h4 style='display:inline;'>shershams</h4> ( 661 <span style='font-size:12pt;'>&#10031;</span> )
+                                <div class='cleaner'></div>
+                                &#10030;&#10030;&#10030;&#10030;&#10025; 82% Positive feedback
+                                <div class='cleaner_h10'></div>
+
+                                <a href='#'>Contact the seller</a>
+                                <div class='cleaner_h5'></div>
+                                <a href='#'>Save this seller</a>
+                                <div class='cleaner_h5'></div>
+                                <div id='flag'>
+                                    Flag this post:
+                                    <div class='cleaner'></div>
+                                    <span class='label important' data-flag='spam'>Spam / Overpost</span>
+                                    <span class='label warning' data-flag='prohibited'>Prohibited</span>
+                                    <span class='label notice' data-flag='miscat'>Miscategorized</span>
+                                    <span class='label success' data-flag='best'>Vote Up</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="span4">
+
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; Company 2012 by <a href='http://www.logikas.com/' target='_blank'>Logikas - Cristian Rinaldi</a></p>
+        </footer>
+
+        <script src="../../libs/bootstrap/js/bootstrap.js"></script>
+        <script src="https://apis.google.com/js/client.js?onload=>onLoadCallback"></script>
+        <script>
+
+            var clientId = '426039087880.apps.googleusercontent.com';
+            var apiKey = 'AIzaSyA4hsZboUT2F1XAzd59sNDZ3leqOyrPKAE';
+            var scopes = 'https://www.googleapis.com/auth/plus.me';
+
+            $(document).ready(function() {
+                $("#signGoogle").click(function() {
+                    checkAuth();
+                });
+                console.log($("#signGoogle"));
+            });
+
+            function loadApi() {
+                gapi.client.load('plus', 'v1', function() {
+
+
+
+                });
+            }
+
+            function checkAuth() {
+                gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+            }
+
+            function handleAuthResult(authResult) {
+
+                console.log("Manejando el Resultado!!!!");
+                console.log(authResult);
+
+                if (authResult && !authResult.error) {
+                    $("signGoogle").hide();
+                    loadApi();
+                }
+            }
+
+            function handleAuthClick(event) {
+                gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+                return false;
+            }
+        </script>
+    </body>
+
+</html>
