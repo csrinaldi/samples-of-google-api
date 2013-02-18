@@ -273,6 +273,15 @@
                 box-shadow: 0 1px 2px rgba(0,0,0,.15);
             }
 
+            /*Visualiza el Contenedor*/
+            .active{
+                display: block;
+            }
+
+            .hide{
+                display: none;
+            }
+
             /* Page header tweaks */
             .page-header {
                 background-color: #f5f5f5;
@@ -295,9 +304,17 @@
             .topbar .btn {
                 border: 0;
             }
-            
+
             .box{
-               margin-left: 25px; 
+                margin-left: 25px; 
+            }
+
+            .row .active{
+                display: inherit;
+            }
+
+            .row .inactive{
+                display: none;
             }
 
         </style>
@@ -329,7 +346,8 @@
                     <a class="brand" href="#">Google Plus API</a>
                     <div class="nav-collapse collapse navbar-responsive-collapse">
                         <ul class="nav">
-                            <li class="active"><a href="#">Home</a></li>
+                            <li data-container="home" data-role="menu" class="active"><a href="#">Home</a></li>
+                            <li data-container="maps" data-role="menu"><a href="#">Google Places</a></li>
                         </ul>
                         <ul class="nav pull-right">
                             <li class="divider-vertical"></li>
@@ -340,55 +358,96 @@
             </div><!-- /navbar-inner -->
         </div>
 
+        <section data-container="home" class="active">
+            <div class="container-fluid">
+                <div class="content">
+                    <div class="row-fluid">
+                        <div class="span10">
+                            <div class="row">
+                                <div class='span4'>
+                                    <div class="well box">
+                                        <h3>Seller Info</h3>
+                                        <h4 style='display:inline;'>shershams</h4> ( 661 <span style='font-size:12pt;'>&#10031;</span> )
+                                        <div class='cleaner'></div>
+                                        &#10030;&#10030;&#10030;&#10030;&#10025; 82% Positive feedback
+                                        <div class='cleaner_h10'></div>
 
-        <div class="content">
-            <div class="row">
-                <div class="span10">
-                    <div class="row">
-                        <div class='span4'>
-                            <div class="well box">
-                                <h3>Seller Info</h3>
-                                <h4 style='display:inline;'>shershams</h4> ( 661 <span style='font-size:12pt;'>&#10031;</span> )
-                                <div class='cleaner'></div>
-                                &#10030;&#10030;&#10030;&#10030;&#10025; 82% Positive feedback
-                                <div class='cleaner_h10'></div>
-
-                                <a href='#'>Contact the seller</a>
-                                <div class='cleaner_h5'></div>
-                                <a href='#'>Save this seller</a>
-                                <div class='cleaner_h5'></div>
-                                <div id='flag'>
-                                    Flag this post:
-                                    <div class='cleaner'></div>
-                                    <span class='label important' data-flag='spam'>Spam / Overpost</span>
-                                    <span class='label warning' data-flag='prohibited'>Prohibited</span>
-                                    <span class='label notice' data-flag='miscat'>Miscategorized</span>
-                                    <span class='label success' data-flag='best'>Vote Up</span>
+                                        <a href='#'>Contact the seller</a>
+                                        <div class='cleaner_h5'></div>
+                                        <a href='#'>Save this seller</a>
+                                        <div class='cleaner_h5'></div>
+                                        <div id='flag'>
+                                            Flag this post:
+                                            <div class='cleaner'></div>
+                                            <span class='label important' data-flag='spam'>Spam / Overpost</span>
+                                            <span class='label warning' data-flag='prohibited'>Prohibited</span>
+                                            <span class='label notice' data-flag='miscat'>Miscategorized</span>
+                                            <span class='label success' data-flag='best'>Vote Up</span>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
+                            <div class="span4">
+
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="span4">
-
+        <section data-container="maps" class="hide">
+            <div class="container-fluid">
+                <div class="content">
+                    <div class="row">
+                        <div class="span12">
+                            <div id="map" style="width: 100%; height: 500px"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
+        </section>
         <footer>
             <p>&copy; Company 2012 by <a href='http://www.logikas.com/' target='_blank'>Logikas - Cristian Rinaldi</a></p>
         </footer>
 
         <script src="../../libs/bootstrap/js/bootstrap.js"></script>
         <script src="https://apis.google.com/js/client.js?onload=>onLoadCallback"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript"
+                src="http://maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=true">
+        </script>
         <script>
 
             var clientId = '426039087880.apps.googleusercontent.com';
             var apiKey = 'AIzaSyA4hsZboUT2F1XAzd59sNDZ3leqOyrPKAE';
             var scopes = 'https://www.googleapis.com/auth/plus.me';
 
+            var lastMenuEnabled = "nav-link-home";
+
+            function disableAllMenuItems() {
+                var menues = $(".nav li");
+                for (i = 0; menues.lenght; i++) {
+                    $(menues[i]).removeClass("active");
+                }
+            }
+
             $(document).ready(function() {
+                $(".nav li").click(function(object) {
+                    type = $(this).data("role");
+                    if (type === "menu") {
+                        //Desactive actual menu
+                        $(".nav li.active").removeClass("active");
+                        //Active menu
+                        $(this).addClass("active");
+                        //Desactive container
+                        $("section.active").removeClass("active").addClass("hide");
+                        //Active container from menu item
+                        var section = $("section[data-container='" + $(this).data("container") + "']");
+                        section.removeClass("hide").addClass("active");
+                    }
+                });
+
                 $("#signGoogle").click(function() {
                     checkAuth();
                 });
@@ -397,10 +456,9 @@
 
             function loadApi() {
                 gapi.client.load('plus', 'v1', function() {
-
-
-
                 });
+
+                initilizeGoogleMap();
             }
 
             function checkAuth() {
@@ -422,7 +480,64 @@
                 gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
                 return false;
             }
+
+            function initilizeGoogleMap() {
+                var mapElenment = document.getElementById('map');
+                var madrid = new google.maps.LatLng(40.420088, -3.688810);
+
+                map = new google.maps.Map(mapElenment, {
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    center: madrid,
+                    zoom: 10
+                });
+
+                //mapElement.hide().fadeIn('fast');
+
+                service = new google.maps.places.PlacesService(map);
+
+                var typesAllowed = ["accounting", "airport", "amusement_park", "aquarium", "art_gallery", "atm", "bakery", "bank", "bar", "beauty_salon", "bicycle_store", "book_store", "bowling_alley", "bus_station", "cafe", "campground", "car_dealer", "car_rental", "car_repair", "car_wash", "casino", "cemetery", "church", "city_hall", "clothing_store", "convenience_store", "courthouse", "dentist", "department_store", "doctor", "electrician", "electronics_store", "embassy", "establishment", "finance", "fire_station", "florist", "food", "funeral_home", "furniture_store", "gas_station", "general_contractor", "grocery_or_supermarket", "gym", "hair_care", "hardware_store", "health", "hindu_temple", "home_goods_store", "hospital", "insurance_agency", "jewelry_store", "laundry", "lawyer", "library", "liquor_store", "local_government_office", "locksmith", "lodging", "meal_delivery", "meal_takeaway", "mosque", "movie_rental", "movie_theater", "moving_company", "museum", "night_club", "painter", "park", "parking", "pet_store", "pharmacy", "physiotherapist", "place_of_worship", "plumber", "police", "post_office", "real_estate_agency", "restaurant", "roofing_contractor", "rv_park", "school", "shoe_store", "shopping_mall", "spa", "stadium", "storage", "store", "subway_station", "synagogue", "taxi_stand", "train_station", "travel_agency", "university", "veterinary_care", "zoo"];
+                var idx = 0;
+                var flag = false;
+                while (idx < typesAllowed.length) {
+                    if (!flag) {
+                        var request = {
+                            location: madrid,
+                            radius: '100',
+                            types: [typesAllowed[idx]]
+                        };
+                        
+                        flag = false;
+                        service.search(request, function(results, status) {
+                            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                for (var i = 0; i < results.length; i++) {
+                                    var place = results[i];
+                                    createMarker(results[i]);
+                                }
+                            } else {
+                                console.log(status);
+                            }
+                            
+                            flag = true;
+                            idx++;
+                        });
+                    }
+                }
+            }
+
+            function createMarker(place) {
+                var placeLoc = place.geometry.location;
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location
+                });
+
+                /*google.maps.event.addListener(marker, 'click', function() {
+                 infowindow.setContent(place.name);
+                 infowindow.open(map, this);
+                 });*/
+            }
+
+
         </script>
     </body>
-
 </html>
