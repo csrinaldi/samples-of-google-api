@@ -418,6 +418,12 @@
                 src="http://maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=true">
         </script>
         <script>
+            window.version = "1";
+            window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB;
+            var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
+            var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
+            window.db = null;
+
 
             var clientId = '426039087880.apps.googleusercontent.com';
             var apiKey = 'AIzaSyA4hsZboUT2F1XAzd59sNDZ3leqOyrPKAE';
@@ -432,6 +438,81 @@
                 }
             }
 
+            //Abriendo la Base de datos, donde explicitamos la version
+            var openDBRequest = window.indexedDB.open("placeDB", window.version);
+
+            //Este evento es disparado cuando la version cambia y es necesario
+            //hacer un cambio en la estructura de la base de datos
+            openDBRequest.onupgradeneeded = function(e) {
+                window.db = e.target.result;
+                clearDb();
+                //Creamos la Persona
+                if (!window.db.objectStoreNames.contains("place")) {
+                    var objectStore = window.db.createObjectStore("place", {
+                        keyPath: "id", autoIncrement: true
+                    });
+                    objectStore.createIndex("place_id", "place_id", {
+                        unique: false
+                    });
+                    objectStore.createIndex("name", "name", {
+                        unique: false
+                    });
+                    objectStore.createIndex("point", "point", {
+                        unique: false
+                    });
+                    objectStore.createIndex("types", "types", {
+                        unique: false
+                    });
+
+                    console.log("ObjectStore create: Success");
+                }
+            }
+
+            //Este evento es disparado cuando la base de datos es abierta sin errores
+            openDBRequest.onsuccess = function(e) {
+                try {
+                    window.db = e.target.result;
+                    clearDb();
+                    //Si no esta creado es porque no se ejecuto el evento "onupgradeneeded"
+                    if (!window.db.objectStoreNames.contains("place")) {
+                        var versionRequest = window.db.setVersion(window.version);
+                        versionRequest.onsuccess = function(e) {
+                            var objectStore = window.db.createObjectStore("place", {
+                                keyPath: "timeStamp"
+                            });
+                            objectStore.createIndex("place_id", "place_id", {
+                                unique: false
+                            });
+                            objectStore.createIndex("name", "name", {
+                                unique: false
+                            });
+                            objectStore.createIndex("point", "point", {
+                                unique: false
+                            });
+                            objectStore.createIndex("types", "types", {
+                                unique: false
+                            });
+
+                            console.log("ObjectStore create: Success");
+                        }
+                        versionRequest.onerror = function(e) {
+
+                            console.log("Setting version: Error");
+                        }
+                    }
+                } catch (e) {
+                    console.log("Log Error" + e);
+                }
+            }
+
+            openDBRequest.onerror = function(e) {
+                console.log("Error opening Data Base");
+                console.log(e);
+            }
+
+            /**
+             * Inicilizacion de la aplicacion
+             */
             $(document).ready(function() {
                 $(".nav li").click(function(object) {
                     type = $(this).data("role");
@@ -451,9 +532,23 @@
                 $("#signGoogle").click(function() {
                     checkAuth();
                 });
-                console.log($("#signGoogle"));
             });
 
+            function clearDb() {
+                var transaction = window.db.transaction(["place"], "readwrite");
+                var person = transaction.objectStore("place");
+                var request = person.clear();
+
+                transaction.oncomplete = function() {
+                    console.log("Clear Database: Success");
+                }
+            }
+
+
+            /**
+             * Carga las APIs de Google e inicializa GoogleMaps
+             * @returns {undefined}
+             */
             function loadApi() {
                 gapi.client.load('plus', 'v1', function() {
                 });
@@ -461,20 +556,26 @@
                 initilizeGoogleMap();
             }
 
+            /**
+             * Autoriza con OAuth
+             * @returns {undefined}
+             */
             function checkAuth() {
                 gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
             }
 
+            /**
+             * Manejador de Autorizacion con OAuth
+             * @param {type} authResult
+             * @returns {undefined}
+             */
             function handleAuthResult(authResult) {
-
-                console.log("Manejando el Resultado!!!!");
-                console.log(authResult);
-
                 if (authResult && !authResult.error) {
                     $("signGoogle").hide();
                     loadApi();
                 }
             }
+
 
             function handleAuthClick(event) {
                 gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
@@ -491,37 +592,100 @@
                     zoom: 10
                 });
 
-                //mapElement.hide().fadeIn('fast');
-
                 service = new google.maps.places.PlacesService(map);
 
-                var typesAllowed = ["accounting", "airport", "amusement_park", "aquarium", "art_gallery", "atm", "bakery", "bank", "bar", "beauty_salon", "bicycle_store", "book_store", "bowling_alley", "bus_station", "cafe", "campground", "car_dealer", "car_rental", "car_repair", "car_wash", "casino", "cemetery", "church", "city_hall", "clothing_store", "convenience_store", "courthouse", "dentist", "department_store", "doctor", "electrician", "electronics_store", "embassy", "establishment", "finance", "fire_station", "florist", "food", "funeral_home", "furniture_store", "gas_station", "general_contractor", "grocery_or_supermarket", "gym", "hair_care", "hardware_store", "health", "hindu_temple", "home_goods_store", "hospital", "insurance_agency", "jewelry_store", "laundry", "lawyer", "library", "liquor_store", "local_government_office", "locksmith", "lodging", "meal_delivery", "meal_takeaway", "mosque", "movie_rental", "movie_theater", "moving_company", "museum", "night_club", "painter", "park", "parking", "pet_store", "pharmacy", "physiotherapist", "place_of_worship", "plumber", "police", "post_office", "real_estate_agency", "restaurant", "roofing_contractor", "rv_park", "school", "shoe_store", "shopping_mall", "spa", "stadium", "storage", "store", "subway_station", "synagogue", "taxi_stand", "train_station", "travel_agency", "university", "veterinary_care", "zoo"];
+                //var typesAllowed = ["accounting", "airport", "amusement_park", "aquarium", "art_gallery", "atm", "bakery", "bank", "bar", "beauty_salon", "bicycle_store", "book_store", "bowling_alley", "bus_station", "cafe", "campground", "car_dealer", "car_rental", "car_repair", "car_wash", "casino", "cemetery", "church", "city_hall", "clothing_store", "convenience_store", "courthouse", "dentist", "department_store", "doctor", "electrician", "electronics_store", "embassy", "establishment", "finance", "fire_station", "florist", "food", "funeral_home", "furniture_store", "gas_station", "general_contractor", "grocery_or_supermarket", "gym", "hair_care", "hardware_store", "health", "hindu_temple", "home_goods_store", "hospital", "insurance_agency", "jewelry_store", "laundry", "lawyer", "library", "liquor_store", "local_government_office", "locksmith", "lodging", "meal_delivery", "meal_takeaway", "mosque", "movie_rental", "movie_theater", "moving_company", "museum", "night_club", "painter", "park", "parking", "pet_store", "pharmacy", "physiotherapist", "place_of_worship", "plumber", "police", "post_office", "real_estate_agency", "restaurant", "roofing_contractor", "rv_park", "school", "shoe_store", "shopping_mall", "spa", "stadium", "storage", "store", "subway_station", "synagogue", "taxi_stand", "train_station", "travel_agency", "university", "veterinary_care", "zoo"];
+                var typesAllowed = ["accounting"];
                 var idx = 0;
-                var flag = false;
-                while (idx < typesAllowed.length) {
-                    if (!flag) {
-                        var request = {
-                            location: madrid,
-                            radius: '100',
-                            types: [typesAllowed[idx]]
-                        };
-                        
-                        flag = false;
-                        service.search(request, function(results, status) {
-                            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                                for (var i = 0; i < results.length; i++) {
-                                    var place = results[i];
-                                    createMarker(results[i]);
-                                }
-                            } else {
-                                console.log(status);
-                            }
-                            
-                            flag = true;
-                            idx++;
-                        });
+                procesing(typesAllowed, idx);
+            }
+
+            /**
+             * Guarda en la Base de datos el Place enviado como parametro
+             * @param {Place} place
+             * @returns {undefined}
+             */
+            function save(place) {
+                if (window.db) {
+                    var transaction = window.db.transaction(["place"], "readwrite");
+
+                    var placeDb = transaction.objectStore("place");
+
+                    var request = placeDb.add({
+                        "timeStamp": new Date().getTime(),
+                        "place_id": place.id,
+                        "name": name,
+                        "types": place.types,
+                        "point": place.geometry.location
+                    });
+
+                    request.onsuccess = function(e) {
+                        console.log("Request is complete: Success ");
+
+                    }
+
+                    request.onerror = function(e) {
+                        console.log("Request is complete: Error " + e);
+                    }
+
+                    transaction.oncomplete = function(e) {
+                        console.log("Request is complete");
+                    };
+
+                    transaction.onerror = function(e) {
+                        console.log(e);
+                        console.log("Transaction is complete: Error ");
                     }
                 }
+            }
+
+            /**
+             * Procesa todos los tipos @see typesAllowed de Google Place y busca
+             * para distintas localizaciones todas las empresas de esos tipos
+             *
+             * @param array typesAllowed
+             * @param int idx
+             **/
+            function procesing(typesAllowed, idx) {
+                console.log("procesing");
+                var madrid = new google.maps.LatLng(40.420088, -3.688810);
+
+                if (idx < typesAllowed.length) {
+
+                    var request = {
+                        location: madrid,
+                        radius: '50000',
+                        types: [typesAllowed[idx]]
+                    };
+
+                    service.search(request, function(results, status, pagination) {
+                        if (status === google.maps.places.PlacesServiceStatus.OK) {
+                            for (var i = 0; i < results.length; i++) {
+                                createMarker(results[i]);
+                                save(results[i]);
+                            }
+                        }
+
+                        if (pagination) {
+                            if (pagination.hasNextPage) {
+                                console.log("Procesing nextPage()");
+                                sleep:2;
+                                pagination.nextPage();
+                            } else { //Por si viene en false
+                                idx++;
+                                setTimeout(function() {
+                                    procesing(typesAllowed, idx);
+                                }, 2000);
+                            }
+                        } else {
+                            idx++;
+                            setTimeout(function() {
+                                procesing(typesAllowed, idx);
+                            }, 2000);
+                        }
+                    });
+                }
+
             }
 
             function createMarker(place) {
